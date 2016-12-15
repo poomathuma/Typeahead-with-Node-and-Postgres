@@ -24,7 +24,7 @@ app.get('/connect', (request, response) => {
   const regex = new RegExp(find, 'g')
 
   let txtqry = qrystr.includes(' ') ? ('\'' + qrystr.replace(regex, ' & ') + '\'') : ('\'' + qrystr + ':*' + '\'')
-  const stmt = 'SELECT name as applicant, email FROM applicants WHERE name @@ to_tsquery(' + txtqry + ')'
+  const stmt = 'SELECT name as applicant, email FROM applicants WHERE to_tsvector(\'English\',name) @@ to_tsquery(' + txtqry + ')'
   console.log(stmt)
   const query = client.query(stmt)
 
