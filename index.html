@@ -65,12 +65,11 @@
 <script>
 $(document).ready(function(){
     $("#search").typeahead({
-        valueKey: 'email',
-        name : 'email',
+        valueKey: 'applicant',
         remote: {
             url : '/connect?query=%QUERY'
         }
-        
+
     });
 });
 </script>

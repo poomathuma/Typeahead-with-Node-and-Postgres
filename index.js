@@ -1,37 +1,43 @@
-require('dotenv').config();
+require('dotenv').config()
 
-const express = require('express');
-const app = express();
+const express = require('express')
+const app = express()
 
-const pg = require('pg');
+const pg = require('pg')
 const dburl = process.env.DBURL
 
-const port = process.env.PORT;
+const port = process.env.PORT
 
 app.get('/', (request, response) => {
-  response.redirect('/index');
-});
+  response.redirect('/index')
+})
 app.get('/index', (request, response) => {
-  response.sendfile('index.html');
-});
+  response.sendfile('index.html')
+})
 
 app.get('/connect', (request, response) => {
-  const client = new pg.Client(dburl);
+  const client = new pg.Client(dburl)
   client.connect()
 
-   const query = client.query("SELECT email FROM applicants where email like '" + request.query.query +"%' limit 10");
-   let results = []
+  let qrystr = request.query.query.trim()
+  const find = ' '
+  const regex = new RegExp(find, 'g')
 
-    query.on('row', function(row,result) {
-         result.addRow(row);
-    });
+  let txtqry = qrystr.includes(' ') ? ('\'' + qrystr.replace(regex, ' & ') + '\'') : ('\'' + qrystr + ':*' + '\'')
+  const stmt = 'SELECT name as applicant, email FROM applicants WHERE name @@ to_tsquery(' + txtqry + ')'
+  console.log(stmt)
+  const query = client.query(stmt)
 
-    query.on('end', function(result) {
-      client.end();
-      response.json( result.rows);
-    });
-});
+  query.on('row', function (row, result) {
+    result.addRow(row)
+  })
+
+  query.on('end', function (result) {
+    client.end()
+    response.json(result.rows)
+  })
+})
 
 app.listen(port, () => {
-  console.log(`listening on port ${ port }`);
-});
+  console.log(`listening on port ${ port }`)
+})
